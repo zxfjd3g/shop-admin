@@ -1,5 +1,6 @@
 import router from './router'
 import store from './store'
+import { lastRoute } from './router'
 import { Message } from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
@@ -26,15 +27,24 @@ router.beforeEach(async(to, from, next) => {
       next({ path: '/' })
       NProgress.done()
     } else {
-      const hasGetUserInfo = store.getters.name
-      if (hasGetUserInfo) {
+
+      const hasRoles = store.getters.roles && store.getters.roles.length > 0
+      if (hasRoles) {
         next()
       } else {
         try {
           // get user info
+          // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
           await store.dispatch('user/getInfo')
 
-          next()
+          // 请求获取当前用户的权限路由
+          const asyncRoutes = await store.dispatch('permission/generateRoutes')
+
+          // 动态添加可访问的权限路由
+          router.addRoutes(asyncRoutes.concat(lastRoute))
+          console.log('asyncRoutes', asyncRoutes.concat(lastRoute))
+
+          next({ ...to, replace: true })
         } catch (error) {
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
@@ -46,7 +56,6 @@ router.beforeEach(async(to, from, next) => {
     }
   } else {
     /* has no token*/
-
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()
