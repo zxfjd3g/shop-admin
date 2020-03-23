@@ -70,7 +70,7 @@ export default {
   */
   deleteById(spuId) {
     return request({
-      url: `${api_name}/deleteSku/${spuId}`,
+      url: `${api_name}/deleteSpu/${spuId}`,
       method: 'delete'
     })
   }

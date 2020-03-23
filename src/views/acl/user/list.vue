@@ -7,17 +7,17 @@
          <el-input v-model="searchObj.username" placeholder="用户名" />
       </el-form-item>
 
-      <el-button type="primary" icon="el-icon-search" @click="fetchData">查询</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
       <el-button type="default" @click="resetData">清空</el-button>
     </el-form>
 
     <!-- 工具条 -->
     <div style="margin-bottom: 20px">
-      <el-button type="primary" @click="addUser()" v-if="$hasBP('user.add')">添加</el-button>
-      <el-button type="danger" @click="removeRows()" v-if="$hasBP('user.remove')">批量删除</el-button>
+      <el-button type="primary" @click="addUser()" v-if="$hasBP('user.add')">添 加</el-button>
+      <el-button type="danger" @click="removeRows()" :disabled="selectedIds.length===0" v-if="$hasBP('user.remove')">批量删除</el-button>
     </div>
 
-    <!-- 讲师列表 -->
+    <!-- 用户列表 -->
     <el-table
       border
       v-loading="listLoading"
@@ -49,11 +49,10 @@
       <el-table-column label="操作" width="230" align="center">
         <template slot-scope="scope">
           <router-link :to="`/acl/user/role/${scope.row.id}?username=${scope.row.username}`" v-if="$hasBP('user.assgin')">
-            <HintButton type="info" size="mini" icon="el-icon-info" title="分配角色"/>
+            <HintButton type="info" size="mini" icon="el-icon-user-solid" title="分配角色"/>
           </router-link>
-          <router-link :to="'/acl/user/update/'+scope.row.id" v-if="$hasBP('user.update')">
-            <HintButton type="primary" size="mini" icon="el-icon-edit" title="修改用户"/>
-          </router-link>
+          <HintButton type="primary" size="mini" icon="el-icon-edit" title="修改用户"
+            v-if="$hasBP('user.update')" @click="toUpdateUser(scope.row.id)"/>
           <HintButton type="danger" size="mini" icon="el-icon-delete" title="删除用户"
             @click="removeDataById(scope.row.id)" v-if="$hasBP('user.remove')"/>
         </template>
@@ -71,21 +70,27 @@
       @current-change="fetchData"
       @size-change="changeSize"
     />
+
+    <AddOrUpdate :isShowDialog="isShowDialog" :id="updateId" 
+      @cancel="onCancel" @success="onSuccess"/>
   </div>
 </template>
 
 <script>
-
+import AddOrUpdate from './addOrUpdate'
 export default {
+  name: 'AclUserList',
   data() {
     return {
       listLoading: true, // 数据是否正在加载
-      list: null, // 讲师列表
+      list: null, // 用户列表
       total: 0, // 数据库中的总记录数
       page: 1, // 默认页码
       limit: 10, // 每页记录数
       searchObj: {}, // 查询表单对象
-      multipleSelection: [] // 批量选择中选择的记录列表
+      selectedIds: [], // 批量选择中选择的记录列表
+      isShowDialog: false,
+      updateId: '', // 需要更新的用户ID
     }
   },
 
@@ -104,19 +109,35 @@ export default {
     },
 
     addUser(){
-      this.$router.push({ path: '/acl/user/add' })
+      this.isShowDialog = true
     },
 
-    // 加载讲师列表数据
+    toUpdateUser (id) {
+      this.isShowDialog = true
+      this.updateId = id
+    },
+
+    onCancel () {
+      this.isShowDialog = false
+      this.updateId = ''
+    },
+
+    onSuccess () {
+      this.isShowDialog = false
+      this.updateId = ''
+      this.fetchData(this.page)
+    },
+
+    // 加载用户列表数据
     fetchData(page = 1) {
       console.log('翻页。。。' + page)
       // 异步获取远程数据（ajax）
       this.page = page
       this.listLoading = true
       this.$API.user.getPageList(this.page, this.limit, this.searchObj).then(
-        response => {
-          this.list = response.data.items
-          this.total = response.data.total
+        result => {
+          this.list = result.data.items
+          this.total = result.data.total
 
           // 数据加载并绑定成功
           this.listLoading = false
@@ -141,9 +162,9 @@ export default {
       }).then(() => { // promise
         // 点击确定，远程调用ajax
         return this.$API.user.removeById(id)
-      }).then((response) => {
+      }).then((result) => {
         this.fetchData(this.page)
-        if (response.success) {
+        if (result.success) {
           this.$message({
             type: 'success',
             message: '删除成功!'
@@ -159,40 +180,21 @@ export default {
 
     // 当表格复选框选项发生变化的时候触发
     handleSelectionChange(selection) {
-      console.log('handleSelectionChange......')
-      console.log(selection)
-      this.multipleSelection = selection
+      this.selectedIds = selection.map(item => item.id)
     },
 
     // 批量删除
     removeRows() {
-      console.log('removeRows......')
-
-      if (this.multipleSelection.length === 0) {
-        this.$message({
-          type: 'warning',
-          message: '请选择要删除的记录!'
-        })
-        return
-      }
-
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => { // promise
-        // 点击确定，远程调用ajax
-        // 遍历selection，将id取出放入id列表
-        var idList = []
-        this.multipleSelection.forEach(item => {
-          idList.push(item.id)
-        // console.log(idList)
-        })
+      }).then(() => {
         // 调用api
-        return this.$API.user.removeRows(idList)
-      }).then((response) => {
+        return this.$API.user.removeUsers(this.selectedIds)
+      }).then((result) => {
         this.fetchData(this.page)
-        if (response.success) {
+        if (result.success) {
           this.$message({
             type: 'success',
             message: '删除成功!'
@@ -205,8 +207,10 @@ export default {
         })
       })
     }
+  },
+
+  components: {
+    AddOrUpdate
   }
 }
 </script>
-
-

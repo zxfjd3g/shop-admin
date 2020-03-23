@@ -16,7 +16,7 @@ export default {
   },
 
   /* 
-  删除订单
+  删除订单 (还没有接口)
   */
   removeById(id) {
     return request({
@@ -26,7 +26,7 @@ export default {
   },
 
   /* 
-  根据ID获取订单
+  根据ID获取订单 (还没有接口)
   */
   getById(id) {
     return request({

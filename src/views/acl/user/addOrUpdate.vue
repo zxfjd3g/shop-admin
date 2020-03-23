@@ -1,35 +1,29 @@
 <template>
-  <div class="app-container">
-    <el-form ref="user" :model="user" :rules="validateRules" label-width="120px">
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="user.username"/>
-      </el-form-item>
-      <el-form-item label="用户昵称">
-        <el-input v-model="user.nickName"/>
-      </el-form-item>
-     
-      <el-form-item v-if="!user.id" label="用户密码" prop="password">
-        <el-input v-model="user.password"/>
-      </el-form-item>
-
-
-      <el-form-item>
-        <el-button :disabled="saveBtnDisabled" type="primary" @click="saveOrUpdate">保存</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
+  <el-dialog :title="user.id ? '修改用户' : '添加用户'" :visible.sync="isShowDialog">
+      <AddOrUpdate/>
+      <el-form ref="user" :model="user" :rules="validateRules" label-width="120px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="user.username"/>
+        </el-form-item>
+        <el-form-item label="用户昵称">
+          <el-input v-model="user.nickName"/>
+        </el-form-item>
+        
+        <el-form-item v-if="!user.id" label="用户密码" prop="password">
+          <el-input v-model="user.password"/>
+        </el-form-item>
+      </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="cancel">取 消</el-button>
+      <el-button :loading="loading" type="primary" @click="saveOrUpdate">确 定</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
 
-const defaultForm = {
-  username: '',
-  nickName: '',
-  password: ''
-}
-
 const validatePass = (rule, value, callback) => {
-  if (value.length < 6) {
+  if (!value || value.length < 6) {
     callback(new Error('密码不能小于6位'))
   } else {
     callback()
@@ -37,10 +31,22 @@ const validatePass = (rule, value, callback) => {
 }
 
 export default {
+  name: 'AddOrUpdate',
+  props: {
+    id: {
+      type: String,
+      default: ''
+    },
+    isShowDialog: {
+      type: Boolean,
+      default: false
+    }
+  },
+
   data() {
     return {
-      user: defaultForm,
-      saveBtnDisabled: false, // 保存按钮是否禁用,
+      user: {},
+      loading: false, // 保存按钮是否禁用,
       validateRules: {
         username: [{ required: true, trigger: 'blur', message: '用户名必须输入' }],
         password: [{ required: true, trigger: 'blur', validator: validatePass }]
@@ -50,37 +56,37 @@ export default {
 
   // 监听器
   watch: {
-    $route(to, from) {
-      console.log('路由变化......')
-      console.log(to)
-      console.log(from)
-      this.init()
+    id (value) {
+      if (value) {
+        this.fetchDataById(value)
+      } else {
+        this.user = {}
+      }
     }
   },
 
-  // 生命周期方法（在路由切换，组件不变的情况下不会被调用）
-  created() {
-    console.log('form created ......')
+  mounted () {
     this.init()
   },
 
   methods: {
 
+    cancel () {
+      this.$emit('cancel')
+    },
+
     // 表单初始化
     init() {
-      if (this.$route.params.id) {
-        const id = this.$route.params.id
+      const id = this.user.id
+      if (id) {
         this.fetchDataById(id)
-      } else {
-        // 对象拓展运算符：拷贝对象，而不是赋值对象的引用
-        this.user = { ...defaultForm }
       }
     },
 
     saveOrUpdate() {
       this.$refs.user.validate(valid => {
         if (valid) {
-          this.saveBtnDisabled = true // 防止表单重复提交
+          this.loading = true // 防止表单重复提交
           if (!this.user.id) {
             this.saveData()
           } else {
@@ -90,30 +96,32 @@ export default {
       })
     },
 
-    // 新增讲师
+    // 新增用户
     saveData() {
-      this.$API.user.save(this.user).then(response => {
+      this.$API.user.save(this.user).then(result => {
         // debugger
-        if (response.success) {
+        if (result.success) {
           this.$message({
             type: 'success',
-            message: response.message
+            message: result.message
           })
-          this.$router.push({ path: '/acl/user/list' })
+          this.loading = false
+          this.$emit('success')
         }
       })
     },
 
     // 根据id更新记录
     updateData() {
-      // teacher数据的获取
-      this.$API.user.updateById(this.user).then(response => {
-        if (response.success) {
+      // 用户列表数据的获取
+      this.$API.user.updateById(this.user).then(result => {
+        if (result.success) {
           this.$message({
             type: 'success',
-            message: response.message
+            message: result.message
           })
-          this.$router.push({ path: '/acl/user/list' })
+          this.loading = false
+          this.$emit('success')
         }
       })
     },

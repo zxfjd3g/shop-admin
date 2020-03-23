@@ -7,7 +7,7 @@
     <!--spu列表-->
     <div v-show="!showSpuForm && !showSkuForm">
       <div style="margin-bottom:10px;">
-        <el-button type="primary" icon="el-icon-plus" size="mini" @click="toAddSpu">添加SPU</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="toAddSpu">添加SPU</el-button>
       </div>
 
       <el-table
@@ -66,6 +66,7 @@
       @listenOnSave="onSpuSave"
       @listenOnClose="onSpuClose"/>
 
+    
     <!--sku表单-->
     <SkuForm
       v-show="showSkuForm"
@@ -82,7 +83,10 @@ import SpuForm from '@/views/product/components/SpuForm'
 import SkuForm from '@/views/product/components/SkuForm'
 
 export default {
-  components: { SpuForm, SkuForm },
+  components: { 
+    SpuForm, 
+    SkuForm 
+  },
 
   data() {
     return {
@@ -119,7 +123,9 @@ export default {
 
   methods: {
 
-    // 获取spu列表
+    /* 
+    处理分类ID后请求加载spu列表数据
+    */
     getSpuList(categoryId = 1, categoryLevel) {
       this.categoryLevel = categoryLevel
       if (categoryLevel === 1) {
@@ -139,14 +145,17 @@ export default {
       this.fetchData(1)
     },
 
-    // 当页码发生改变的时候
+    /* 
+    当页码发生改变的时候
+    */
     changeSize(size) {
-      console.log(size)
       this.limit = size
-      this.fetchData(1)
+      this.fetchData()
     },
 
-    // 加载banner列表数据
+    /* 
+    请求加载spu分页列表数据
+    */
     fetchData(page = 1) {
       console.log('翻页。。。' + page)
       // 异步获取远程数据（ajax）
@@ -161,7 +170,9 @@ export default {
       )
     },
 
-    // 选择三级分类确认
+    /* 
+    选择三级分类确认
+    */
     confirmSelect() {
       if (!this.category3Id) {
         this.$alert('请选择三级分类', '提示', {
@@ -173,7 +184,9 @@ export default {
       return true
     },
 
-    // 添加spu
+    /* 
+    显示添加SPU的界面
+    */
     toAddSpu() {
       if (!this.confirmSelect()) {
         return
@@ -186,53 +199,69 @@ export default {
       this.showSpuForm = true
     },
 
-    // 保存spu后刷新列表
+    /* 
+    保存spu后重新获取列表
+    */
     onSpuSave() {
       // 刷新Spu列表
       this.getSpuList(this.category3Id)
-
       // 隐藏表单
       this.showSpuForm = false
     },
 
-    // 关闭spu表单
+    /* 
+    关闭SPU表单
+    */
     onSpuClose() {
       // 隐藏表单
       this.showSpuForm = false
     },
 
-    // 添加sku
+    /* 
+    显示添加SKU的界面
+    */
     toAddSku(spuId, spuName, tmId) {
       this.selectedSpu.spuId = spuId
       this.selectedSpu.spuName = spuName
-
       // 初始化表单
       this.$refs.skuForm.init(spuId, this.category1Id, this.category2Id, this.category3Id, tmId)
-
       // 显示表单
       this.showSkuForm = true
     },
 
-    // 保存sku
+    /* 
+    在保存SKU后处理
+    */
     onSkuSave() {
       // 隐藏表单
       this.showSkuForm = false
     },
 
-    // 关闭sku表单
+    /* 
+    在关闭sku表单后处理
+    */
     onSkuClose() {
       // 隐藏表单
       this.showSkuForm = false
     },
 
+    /**
+     * TODO 
+     */
     toShowSkus (spuId) {
 
     },
 
+    /**
+     * TODO
+     */
     toUpdateSpu (spu) {
 
     },
 
+    /* 
+    删除指定的SPU
+    */
     deleteSpu (spuId) {
       this.$confirm(`确定删除此SPU吗?`, '提示', {
           confirmButtonText: '确定',
@@ -254,7 +283,6 @@ export default {
           }
         })
     }
-
   }
 }
 </script>

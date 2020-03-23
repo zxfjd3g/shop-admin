@@ -4,10 +4,12 @@
     <!--三级下拉列表-->
     <CategorySelector @listenOnSelect="getAttrInfoList" />
 
+      <el-divider></el-divider>
+
       <!--属性列表-->
       <div v-if="!showAttrInfoForm">
         <div style="margin-bottom:10px;">
-          <el-button type="primary" icon="el-icon-plus" size="mini" @click="toAddAttrInfo">添加平台属性</el-button>
+          <el-button type="primary" icon="el-icon-plus" @click="toAddAttrInfo">添加平台属性</el-button>
         </div>
 
         <el-table
@@ -47,11 +49,13 @@
       <el-form v-else :model="attrInfoForm" :inline="true">
 
         <el-form-item label="属性名称">
-          <el-input v-model="attrInfoForm.attrName"/>
+          <el-input v-model="attrInfoForm.attrName" placeholder="输入属性名称"/>
         </el-form-item>
 
         <div style="margin-bottom:10px;">
-          <el-button type="primary" icon="el-icon-plus" size="mini" @click="addAttrValue">添加属性值</el-button>
+          <el-button :disabled="!attrInfoForm.attrName" type="primary" 
+            icon="el-icon-plus" @click="addAttrValue">添加属性值</el-button>
+          <el-button type="default" @click="backToAttrList()" style="position: right">返回</el-button>
         </div>
 
         <div>
@@ -82,7 +86,7 @@
                 <span
                   v-else
                   style="display: inline-block; width: 100%;"
-                  @click="editAttrValue(scope.row)">{{ scope.row.valueName }}</span>
+                  @click="toEditAttrValue(scope.row)">{{ scope.row.valueName }}</span>
               </template>
             </el-table-column>
 
@@ -97,8 +101,8 @@
 
         <!--保存和返回按钮-->
         <div style="margin-top:22px;">
-          <el-button type="primary" size="mini" @click="saveAttrInfo()">保存</el-button>
-          <el-button type="default" size="mini" @click="backToAttrList()">返回</el-button>
+          <el-button type="primary" @click="saveAttrInfo()">保存</el-button>
+          <el-button type="default" @click="backToAttrList()">返回</el-button>
         </div>
       </el-form>
 
@@ -112,7 +116,6 @@ export default {
   name: 'PropList',
   data() {
     return {
-
       // 属性所属分类
       category1Id: 0,
       category2Id: 0,
@@ -121,15 +124,15 @@ export default {
       categoryLevel: 1,
 
       // 属性列表数据
-      attrInfoList: null,
+      attrInfoList: [],
       attrInfoListLoading: false,
 
       // 属性表单数据
       showAttrInfoForm: false,
       attrValueListLoading: false,
       attrInfoForm: {
-        id: null,
-        attrName: null,
+        id: '',
+        attrName: '',
         category1Id: 0,
         category2Id: 0,
         category3Id: 0,
@@ -140,7 +143,9 @@ export default {
 
   methods: {
 
-    // 获取属性列表
+    /* 
+    获取属性列表
+    */
     getAttrInfoList(categoryId, categoryLevel) {
       this.categoryId = categoryId
       this.categoryLevel = categoryLevel
@@ -158,15 +163,22 @@ export default {
       }
       // 查询数据
       this.attrInfoListLoading = true
-      this.$API.prop.getAttrInfoList(this.category1Id, this.category2Id, this.category3Id).then(response => {
-        this.attrInfoList = response.data
+      this.$API.prop.getAttrInfoList(this.category1Id, this.category2Id, this.category3Id).then(result => {
+        this.attrInfoList = result.data
         this.attrInfoListLoading = false
       })
     },
 
-    // 添加平台属性
+    /* 
+    添加平台属性
+    */
     toAddAttrInfo() {
-      if (!this.confirmSelect()) {
+      // 如果没有选择分类提示警告框同时结束
+      if (!this.category1Id) {
+        this.$alert('请选择分类', '提示', {
+          confirmButtonText: '确定',
+          type: 'warning'
+        })
         return
       }
 
@@ -179,26 +191,16 @@ export default {
       this.showAttrInfoForm = true
     },
 
-    // 选择三级分类确认
-    confirmSelect() {
-      if (!this.category1Id) {
-        this.$alert('请选择分类', '提示', {
-          confirmButtonText: '确定',
-          type: 'warning'
-        })
-        return false
-      }
-      return true
-    },
-
-    // 修改属性
+    /* 
+    修改属性
+    */
     editAttrInfoById(attrId, attrName) {
       // 获取属性值列表
       this.attrValueListLoading = true
-      this.$API.prop.getAttrValueList(attrId).then(response => {
+      this.$API.prop.getAttrValueList(attrId).then(result => {
         this.attrInfoForm.id = attrId
         this.attrInfoForm.attrName = attrName
-        this.attrInfoForm.attrValueList = response.data
+        this.attrInfoForm.attrValueList = result.data
         this.attrValueListLoading = false
       })
       // 显示表单
@@ -212,11 +214,13 @@ export default {
       this.attrInfoForm.attrValueList.splice(index, 1)
     },
 
-    // 保存属性和属性值
+    /* 
+    保存属性和属性值
+    */
     saveAttrInfo() {
       this.attrInfoForm.categoryId = this.categoryId
       this.attrInfoForm.categoryLevel = this.categoryLevel
-      this.$API.prop.saveAttrInfo(this.attrInfoForm).then(response => {
+      this.$API.prop.saveAttrInfo(this.attrInfoForm).then(result => {
         // 刷新属性列表
         this.getAttrInfoList(this.categoryId, this.categoryLevel)
         // 隐藏表单
@@ -224,13 +228,17 @@ export default {
       })
     },
 
-    // 返回属性列表页面
+    /* 
+    返回属性列表页面
+    */
     backToAttrList() {
       // 隐藏表单
       this.showAttrInfoForm = false
     },
 
-    // 添加属性值
+    /* 
+    在前台添加属性值, 还不提交请求
+    */
     addAttrValue() {
       const attrValue = {
         valueName: '',
@@ -239,16 +247,19 @@ export default {
       this.attrInfoForm.attrValueList.push(attrValue)
     },
 
-    // 保存属性值
+    /* 
+    在前台保存属性值
+    */
     saveAttrValue(row) {
       if (row.valueName.trim()) {
         row.edit = false
       }
     },
 
-    // 编辑属性值
-    editAttrValue(row) {
-      console.log('--------')
+    /* 
+    编辑属性值
+    */
+    toEditAttrValue(row) {
       // row.edit = true
       Vue.set(row, 'edit', true)
     }

@@ -27,11 +27,11 @@ export default {
   /* 
   保存一级菜单项
   */
-  saveLevelOne(menuItem) {
+  savePermission(permission) {
     return request({
       url: `${api_name}/save`,
       method: "post",
-      data: menuItem
+      data: permission
     })
   },
 

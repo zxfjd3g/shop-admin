@@ -30,106 +30,112 @@ const defaultForm = {
 }
 
 export default {
+
   data() {
     return {
+      BASE_API: process.env.BASE_API,
       trademark: defaultForm,
       saveBtnDisabled: false, // 保存按钮是否禁用
-      BASE_API: process.env.BASE_API
     }
   },
 
-  // 监听器
   watch: {
+    // 路由变化时, 重新初始化
     $route(to, from) {
-      console.log('路由变化......')
-      console.log(to)
-      console.log(from)
       this.init()
     }
   },
 
-  // 生命周期方法（在路由切换，组件不变的情况下不会被调用）
-  created() {
-    console.log('form created ......')
+  mounted () {
     this.init()
   },
 
   methods: {
 
-    // 表单初始化
+    /* 
+    表单初始化: 添加与重新做不同处理
+    */
     init() {
-      // debugger
       if (this.$route.params && this.$route.params.id) {
         const id = this.$route.params.id
         this.fetchDataById(id)
       } else {
-        // 对象拓展运算符：拷贝对象，而不是赋值对象的引用
         this.trademark = { ...defaultForm }
       }
     },
 
+    /* 
+    保存或更新
+    */
     saveOrUpdate() {
       this.saveBtnDisabled = true // 防止表单重复提交
       if (!this.trademark.id) {
-        this.saveData()
+        this.addTradeMark()
       } else {
-        this.updateData()
+        this.updateTradeMark()
       }
     },
 
-    // 新增
-    saveData() {
-      this.$API.tradeMark.save(this.trademark).then(response => {
+    /* 
+    请求添加一个新的品牌
+    */
+    addTradeMark() {
+      this.$API.tradeMark.save(this.trademark).then(result => {
         // debugger
-        if (response.code) {
+        if (result.code) {
           this.$message({
             type: 'success',
-            message: response.message
+            message: result.message
           })
-          this.$router.push({ path: '/product/trademark' })
+          this.$router.replace({ path: '/product/trademark' })
         }
       })
     },
 
-    // 根据id更新记录
-    updateData() {
-      this.$API.tradeMark.updateById(this.trademark).then(response => {
-        // debugger
-        if (response.code) {
+    /* 
+    请求更新品牌
+    */
+    updateTradeMark() {
+      this.$API.tradeMark.updateById(this.trademark).then(result => {
+        if (result.code) {
           this.$message({
             type: 'success',
-            message: response.message
+            message: result.message
           })
-          this.$router.push({ path: '/product/trademark' })
+          this.$router.replace({ path: '/product/trademark' })
         }
       })
     },
 
-    // 根据id查询记录
+    /* 
+    异步获取指定id的品牌
+    */
     fetchDataById(id) {
-      this.$API.tradeMark.getById(id).then(response => {
-        // debugger
-        this.trademark = response.data
+      this.$API.tradeMark.getById(id).then(result => {
+        this.trademark = result.data
       })
     },
 
-    // banner上传成功的回调
-    handleImageUrlSuccess(response) {
-      this.trademark.logoUrl = response.data
+    /* 
+    图片上传成功的回调
+    */
+    handleImageUrlSuccess(result) {
+      this.trademark.logoUrl = result.data
     },
 
-    // 上传之前的回调
+    /* 
+    上传之前的回调
+    */
     beforeImageUrlUpload(file) {
-      const isJPG = ['image/jpeg', 'image/png'].includes(file.type) 
+      const isImg = ['image/jpeg', 'image/png'].includes(file.type) 
       const isLt2M = file.size / 1024 / 1024 < 2
-
-      // if (!isJPG) {
-      //   this.$message.error('上传封面图片只能是 JPG/PNG 格式!')
-      // }
-      // if (!isLt2M) {
-      //   this.$message.error('上传封面图片大小不能超过 2MB!')
-      // }
-      return isJPG && isLt2M // 返回false不上传
+      if (!isImg) {
+        this.$message.error('上传封面图片只能是 JPG/PNG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传封面图片大小不能超过 2MB!')
+      }
+      return isImg && isLt2M // 返回false不上传
     }
   }
 }

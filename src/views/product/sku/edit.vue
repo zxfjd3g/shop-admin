@@ -40,13 +40,18 @@ export default {
 
   methods: {
 
+    /* 
+    异步获取SkU
+    */
     async getSku () {
       const id = this.$route.params.id
       const result = await this.$API.sku.getById(id)
       this.sku = result.data
     },
     
-    // 更新Sku
+    /* 
+    更新Sku ---还没法更新
+    */
     async updateSkuInfo() {
       const {id, skuName, price, weight, skuDesc} = this.sku
       const result = await this.$API.sku.update({id, skuName, price, weight, skuDesc})

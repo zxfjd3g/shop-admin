@@ -65,18 +65,18 @@ export default {
 
   // 初始化一级类别
   created() {
-    this.$API.category.getCategorys1().then(response => {
-      this.categoryList1 = response.data
+    this.$API.category.getCategorys1().then(result => {
+      this.categoryList1 = result.data
     })
   },
 
   methods: {
     // 切换二级类别
     category1Changed() {
-      this.$API.category.getCategorys2(this.category1Id).then(response => {
+      this.$API.category.getCategorys2(this.category1Id).then(result => {
         this.category2Id = null
         this.category3Id = null
-        this.categoryList2 = response.data
+        this.categoryList2 = result.data
 
         this.$emit('listenOnSelect', this.category1Id, 1)
       })
@@ -87,9 +87,9 @@ export default {
 
     // 切换三级类别
     category2Changed() {
-      this.$API.category.getCategorys3(this.category2Id).then(response => {
+      this.$API.category.getCategorys3(this.category2Id).then(result => {
         this.category3Id = null
-        this.categoryList3 = response.data
+        this.categoryList3 = result.data
 
         this.$emit('listenOnSelect', this.category2Id, 2)
       })

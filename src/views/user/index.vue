@@ -1,8 +1,7 @@
 <template>
   <div>
-    <!-- 指定搜索条件 -->
+    <!-- 表单组件: 指定搜索条件 -->
     <el-form :inline="true" class="demo-form-inline">
-
       <el-form-item>
         <el-input type="text" width="100" placeholder="用户名称" v-model="searchObj.loginName" clearable/>
       </el-form-item>
@@ -17,15 +16,16 @@
       <el-button type="default" @click="resetData()">清空</el-button>
     </el-form>
 
-
-    <!-- 表格组件 -->
+    <!-- 表格组件: 显示列表 -->
     <el-table
-      :data="users"
-      v-loading="loading"
-      element-loading-text="数据正在加载......"
+      
       border
+      stripe
       fit
       highlight-current-row
+      :data="users"
+      v-loading="loading"
+      element-loading-text="拼命加载中..."
     >
       <el-table-column align="center" label="用户ID" width="100" prop="id"/>
 
@@ -69,17 +69,20 @@
 
 <script type="text/ecmascript-6">
   export default {
+    name: 'UserList',
+
     data () {
       return {
-        users: [],
+        users: [], // 当前页的用户列表
         total: 0, // 数据库中的总记录数
         page: 1, // 默认页码
         limit: 10, // 每页记录数
-        loading: false,
+        loading: false, // 是否正在请求中
         searchObj: {}, // 查询表单对象
       }
     },
 
+    // 初始获取第1页的用户列表显示
     mounted () {
       this.getUsers()
     },
@@ -88,8 +91,8 @@
       getUsers (page=1) {
         this.loading = true
         this.$API.clientUser.getPageList(page, this.limit, this.searchObj)
-          .then(response => {
-            const { records, total } = response.data
+          .then(result => {
+            const { records, total } = result.data
             this.total = total
             this.users = records
             this.loading = false
@@ -111,7 +114,3 @@
   }
 </script>
 
-<style scoped>
-
- 
-</style>

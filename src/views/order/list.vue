@@ -1,9 +1,7 @@
 <template>
   <div>
     <!--查询表单-->
-
     <el-form :inline="true" class="demo-form-inline">
-
       <el-form-item label="订单号">
         <el-input type="text" width="100" placeholder="订单号" v-model="searchObj.outTradeNo" clearable/>
       </el-form-item>
@@ -43,20 +41,20 @@
         <el-input type="text" width="150" placeholder="送货地址" v-model="searchObj.deliveryAddress" clearable/>
       </el-form-item>
 
-      <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="getOrders()">查询</el-button>
       <el-button type="default" @click="resetData()">清空</el-button>
     </el-form>
 
 
-    <!-- 讲师列表 -->
+    <!-- 订单列表 -->
     <el-table
       border
-      v-loading="listLoading"
-      :data="list"
       stripe
-      style="width: 100%"
+      fit
+      highlight-current-row
+      :data="list"
+      v-loading="loading"
       @selection-change="handleSelectionChange"
-      
     >
 
       <el-table-column
@@ -104,7 +102,7 @@
       :page-sizes="[5, 10, 20, 30, 40, 50, 100]"
       style="padding: 30px 0; text-align: center;"
       layout="sizes, prev, pager, next, jumper, ->, total, slot"
-      @current-change="fetchData"
+      @current-change="getOrders"
       @size-change="changeSize"
     />
   </div>
@@ -117,8 +115,8 @@ export default {
 
   data() {
     return {
-      listLoading: true, // 数据是否正在加载
-      list: null, // 讲师列表
+      loading: true, // 数据是否正在加载
+      list: null, // 订单列表
       total: 0, // 数据库中的总记录数
       page: 1, // 默认页码
       limit: 5, // 每页记录数
@@ -130,8 +128,7 @@ export default {
 
   // 生命周期函数：内存准备完毕，页面尚未渲染
   mounted() {
-    console.log('list created......')
-    this.fetchData()
+    this.getOrders()
   },
 
   watch: {
@@ -147,58 +144,60 @@ export default {
 
   methods: {
 
-    // 当页码发生改变的时候
+    /* 
+    当页码发生改变的时候
+    */
     changeSize(size) {
       console.log(size)
       this.limit = size
-      this.fetchData(1)
+      this.getOrders(1)
     },
 
-    // fetchDataSelect(key) {
-    //   console.log(key)
-    // },
-
-    // 加载讲师列表数据
-    fetchData(page = 1) {
+    /* 
+    加载订单列表数据
+    */
+    getOrders(page = 1) {
       this.page = page
 
       this.$API.order.getPageList(this.page, this.limit,this.searchObj).then(
-        response => {
-          this.list = response.data.records
-          this.total = response.data.total
+        result => {
+          this.list = result.data.records
+          this.total = result.data.total
 
           // 数据加载并绑定成功
-          this.listLoading = false
+          this.loading = false
         }
       )
     },
 
-    // 重置查询表单
+    /* 
+    重置查询表单
+    */
     resetData() {
-      console.log('重置查询表单')
       this.searchObj = {}
-      this.fetchData()
+      this.getOrders()
     },
 
-    // 根据id删除数据
-    removeDataById(id) {
-      // debugger
+    /* 
+    根据id删除数据 (没有接口)
+    */
+    deleteOrder(id) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => { // promise
         // 点击确定，远程调用ajax
-        return teacher.removeById(id)
-      }).then((response) => {
-        this.fetchData(this.page)
-        if (response.success) {
+        return this.$API.order.removeById(id)
+      }).then((result) => {
+        this.getOrders(this.page)
+        if (result.success) {
           this.$message({
             type: 'success',
             message: '删除成功!'
           })
         }
-      }).catch(() => {
+      }).catch((error) => {
         this.$message({
           type: 'info',
           message: '已取消删除'

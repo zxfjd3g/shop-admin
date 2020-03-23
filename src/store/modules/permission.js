@@ -4,11 +4,20 @@ import Layout from '@/layout'
 
 function filterAsyncRouter(asyncRouterMap) { // 遍历后台传来的路由组件字符串，转换为组件对象
   const accessedRouters = asyncRouterMap.filter(route => {
-    const component = route.component
+    let component = route.component
     if (component) {
+      if (component!=="Layout" && component.indexOf('/')!==0) {
+        component = '/' + component
+      }
       // route.component = component === 'Layout' ? Layout : () => import('@/views' + component + '.vue')
       // route.component = component === 'Layout' ? Layout : () => import(`@/views${component}.vue`)
-      route.component = component === 'Layout' ? Layout : require('@/views' + component + '.vue').default
+      try {
+        route.component = component === 'Layout' ? Layout : require('@/views' + component + '.vue').default
+      } catch (e) {
+        console.log(e)
+        return false
+      }
+      
     }
     if (route.children && route.children.length) {
       route.children = filterAsyncRouter(route.children)

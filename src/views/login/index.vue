@@ -3,7 +3,7 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">Login Form</h3>
+        <h3 class="title">尚品汇后台管理系统</h3>
       </div>
 
       <el-form-item prop="username">
@@ -45,7 +45,7 @@
 
       <div class="tips">
         <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
+        <span> password: 111111</span>
       </div>
 
     </el-form>
@@ -53,10 +53,10 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 
 export default {
   name: 'Login',
+  
   data() {
     const validateUsername = (rule, value, callback) => {
       if (value.length<4) {
@@ -86,14 +86,16 @@ export default {
       redirect: undefined
     }
   },
+  
   watch: {
     $route: {
       handler: function(route) {
         this.redirect = route.query && route.query.redirect
       },
-      immediate: true
+      immediate: true // 监视回调初始就会执行一次, 而不是改变才调用
     }
   },
+  
   methods: {
     showPwd() {
       if (this.passwordType === 'password') {
@@ -138,9 +140,11 @@ $cursor: #fff;
     color: $cursor;
   }
 }
-
 /* reset element-ui css */
 .login-container {
+  background-image: url(~@/assets/bg.jpg);
+  background-color: #2d3a4b;
+  background-size: cover;
   .el-input {
     display: inline-block;
     height: 47px;

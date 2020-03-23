@@ -90,7 +90,7 @@
               size="small"
               @keyup.enter.native="saveAttrValue(scope.row)"
               @blur="saveAttrValue(scope.row)" />
-            <el-button v-else class="button-new-tag" size="small" @click="editAttrValue(scope.row)">+ 添加</el-button>
+            <el-button v-else class="button-new-tag" size="small" @click="toEditAttrValue(scope.row)">+ 添加</el-button>
           </template>
         </el-table-column>
 
@@ -113,7 +113,6 @@
       <img :src="dialogImageUrl" width="100%" alt="">
     </el-dialog>
   </el-form>
-
 </template>
 
 <script>
@@ -140,6 +139,7 @@ export default {
         // 销售属性
         spuSaleAttrList: []
       },
+
       spuSaleAttrListTemp: [], // 临时数据：格式：baseSaleAttrId|saleAttrName
 
       // 销售属性列表loading
@@ -171,27 +171,34 @@ export default {
         spuSaleAttrList: []
       }
 
+      // 获取基本销售属性列表
       this.getBaseSaleAttrList()
       // 获取品牌列表
       this.getTrademarkList()
     },
 
-    // 获取基本销售属性列表
+    /* 
+    获取基本销售属性列表
+    */
     getBaseSaleAttrList() {
-      this.$API.spu.getBaseSaleAttrList().then(response => {
-        this.baseSaleAttrList = response.data
+      this.$API.spu.getBaseSaleAttrList().then(result => {
+        this.baseSaleAttrList = result.data
       })
     },
 
-    // 获取品牌列表
+    /* 
+    获取品牌列表
+    */
     getTrademarkList() {
       // 查询数据
-      this.$API.tradeMark.getList().then(response => {
-        this.trademarkList = response.data
+      this.$API.tradeMark.getList().then(result => {
+        this.trademarkList = result.data
       })
     },
 
-    // 保存Spu
+    /* 
+    保存SPU
+    */
     saveSpuInfo() {
       this.spuForm.category3Id = this.category3Id
       this.spuForm.spuSaleAttrList = []
@@ -218,21 +225,23 @@ export default {
         this.spuForm.spuSaleAttrList.push(saleAttr)
       })
 
-      // console.log(this.spuForm)
-
-      console.log(JSON.stringify(this.spuForm))
-      this.$API.spu.saveSpuInfo(this.spuForm).then(response => {
+      // console.log(JSON.stringify(this.spuForm))
+      this.$API.spu.saveSpuInfo(this.spuForm).then(result => {
         // 调用父组件监听函数
         this.$emit('listenOnSave')
       })
     },
 
-    // 返回Spu列表页面
+    /* 
+    返回Spu列表页面
+    */
     backToSpuList() {
       this.$emit('listenOnClose')
     },
 
-    // 文件上传限制条件
+    /* 
+    文件上传限制条件
+    */
     beforeUpload(file) {
       const isJPG = file.type === 'image/jpeg'
       const isPNG = file.type === 'image/png'
@@ -250,7 +259,9 @@ export default {
       return true
     },
 
-    // 上传图片成功的回调
+    /* 
+    上传图片成功的回调
+    */
     onUploadSuccess(res, file) {
       // debugger
       // 填充上传文件列表
@@ -260,13 +271,17 @@ export default {
       })
     },
 
-    // 上传的文件预览
+    /* 
+    上传的文件预览
+    */
     onUploadPreview(file) {
       this.dialogImageUrl = file.url
       this.dialogImageVisible = true
     },
 
-    // 删除上传的文件
+    /* 
+    删除上传的文件
+    */
     onUploadRemove(file, fileList) {
       this.spuForm.spuImageList = []
       fileList.forEach(file => {
@@ -277,7 +292,9 @@ export default {
       })
     },
 
-    // 添加销售属性
+    /* 
+    添加销售属性
+    */
     addSaleAttr() {
       const saleAttr = {
         saleAttr: null, // id|name 字符串
@@ -288,23 +305,24 @@ export default {
       this.spuSaleAttrListTemp.push(saleAttr)
     },
 
-    // 根据name删除销售属性
+    /* 
+    根据name删除销售属性
+    */
     deleteSaleAttr(saleAttr) {
-      const tempList = []
-      this.spuForm.spuSaleAttrList.forEach(item => {
-        if (item.saleAttr !== saleAttr) {
-          tempList.push(item)
-        }
-      })
-      this.spuForm.spuSaleAttrList = tempList
+      const list = this.spuForm.spuSaleAttrList.filter(item => item.saleAttr !== saleAttr)
+      this.spuForm.spuSaleAttrList = list
     },
 
-    // 添加销售属性值
-    editAttrValue(row) {
+    /* 
+    显示添加销售属性值界面
+    */
+    toEditAttrValue(row) {
       row.edit = true
     },
 
-    // 保存销售属性值
+    /* 
+    保存销售属性值
+    */
     saveAttrValue(row) {
       if (!row.spuSaleAttrValueList) {
         row.spuSaleAttrValueList = []
@@ -319,7 +337,9 @@ export default {
       row.edit = false
     },
 
-    // 删除销售属性值
+    /* 
+    删除销售属性值
+    */
     handleTagClose(tag, row) {
       const index = row.spuSaleAttrValueList.indexOf(tag)
       row.spuSaleAttrValueList.splice(index, 1)

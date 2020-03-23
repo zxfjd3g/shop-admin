@@ -3,11 +3,9 @@ import { Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-console.log('---', process.env.VUE_APP_BASE_API)
-// create an axios instance
+// 创建一个新的axios
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
   timeout: 20000 //请求超时时间
 })
 
@@ -47,7 +45,7 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error) // for debug
     Message({
-      message: error.message,
+      message: error.message || '请求出错了',
       type: 'error',
       duration: 5 * 1000
     })

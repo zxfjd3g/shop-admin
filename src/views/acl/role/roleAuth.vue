@@ -51,8 +51,8 @@
         }
       },
       fetchDataById(roleId) {
-        this.$API.menu.toAssign(roleId).then(response => {
-          this.data = response.data.children
+        this.$API.menu.toAssign(roleId).then(result => {
+          this.data = result.data.children
           var jsonList = JSON.parse(JSON.stringify(this.data))
           var list = []
           this.getJsonToList(list, jsonList[0]['children'])
@@ -86,9 +86,9 @@
         var ids = this.$refs.tree.getCheckedKeys().join(",");
         //vue elementUI tree树形控件获取父节点ID的实例
         //node_modules\element-ui\lib\element-ui.common.js
-        //25348行修改源码
-        this.$API.menu.doAssign(this.roleId, ids).then(response => {
-          if (response.success) {
+        //25377行修改源码
+        this.$API.menu.doAssign(this.roleId, ids).then(result => {
+          if (result.success) {
             this.$message({
               type: 'success',
               message: '保存成功'

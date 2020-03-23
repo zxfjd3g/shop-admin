@@ -51,10 +51,10 @@
       },
       
       getById(userId) {
-        this.$API.user.getAssign(userId).then(response => {
-          var jsonObj = response.data.assignRoles
+        this.$API.user.getAssign(userId).then(result => {
+          var jsonObj = result.data.assignRoles
           this.checkedCities = this.getJsonToList(jsonObj, "id")
-          this.cities = response.data.allRolesList
+          this.cities = result.data.allRolesList
         })
       },
 

@@ -5,10 +5,9 @@
       lazy
       :data="categorys"
       :load="load"
-      style="width: 800px;margin-bottom: 20px;"
+      style="width: 900px;margin-bottom: 20px;"
       :row-key="getRowKey"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-      :expand-row-keys="expandKeys"
       @row-click="rowClik"
       :row-class-name="tableRowClassName"
     >
@@ -50,8 +49,7 @@ export default {
 
   data() {
     return {
-      categorys: [],
-      expandKeys: [],
+      categorys: [], //用于存储所有分类列表的数组
       categoryName: ''
     };
   },
@@ -117,12 +115,6 @@ export default {
 
     rowClik(row){
       const rowKey = this.getRowKey(row)
-      console.log('rowClik()', rowKey, this.expandKeys[0])
-      /* if(rowKey===this.expandKeys[0]){//点击另一行的时候，把expands清空。即可把上一行给关闭，展开当前点击行
-        this.expandKeys=[]
-      } else{
-        this.expandKeys=[rowKey]
-      } */
     },
 
     tableRowClassName({row, rowIndex}) {
@@ -135,7 +127,7 @@ export default {
 }
 </script>
 <style>
-  .el-table .level2-row {
-    background: #f0f9eb;
-  }
+.el-table .level2-row {
+  background: #f0f9eb;
+}
 </style>

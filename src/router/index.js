@@ -3,7 +3,7 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-/* Layout */
+/* Layout: 整体界面布局的根路由组件 */
 import Layout from '@/layout'
 
 /**
@@ -26,23 +26,23 @@ import Layout from '@/layout'
  */
 
 /**
- * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
+ * 常量路由的数组
+ * 也就是任何角色用户都可以访问的所有路由的数组
  */
 export const constantRoutes = [
+  // 登陆
   {
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
+  // 404
   {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
   },
-
+  // 首页根路由
   {
     path: '/',
     component: Layout,
@@ -56,20 +56,30 @@ export const constantRoutes = [
   }
 ]
 
+/* 
+必须最后才注册的路由
+用于处理当请求路径没有一个匹配时, 自动跳转到404路由界面
+*/
 export const lastRoute = { path: '*', redirect: '/404', hidden: true }
 
+/* 
+用于创建只注册常量路由的路由器的函数
+*/
 const createRouter = () => new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
 
+// 生成只包含常量路由的路由器
 const router = createRouter()
 
+// 向外暴露重置路由器的matcher的函数
 // Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router
 }
 
+// 向外暴露路由器
 export default router
