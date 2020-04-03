@@ -12,7 +12,8 @@
           :before-upload="beforeImageUrlUpload"
           :action="'http://182.92.128.115/admin/product/fileUpload'"
           class="avatar-uploader">
-          <img :src="trademark.logoUrl">
+          <img v-if="trademark.logoUrl" :src="trademark.logoUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
       </el-form-item>
 
@@ -26,7 +27,7 @@
 <script>
 const defaultForm = {
   tmName: '',
-  logoUrl: '/static/default.jpg'
+  logoUrl: ''
 }
 
 export default {
@@ -140,3 +141,29 @@ export default {
   }
 }
 </script>
+
+<style>
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 150px;
+  height: 150px;
+  line-height: 150px;
+  text-align: center;
+}
+.avatar {
+  width: 150px;
+  height: 150px;
+  display: block;
+}
+</style>

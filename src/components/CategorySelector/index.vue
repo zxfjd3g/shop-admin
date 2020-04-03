@@ -71,26 +71,24 @@ export default {
   },
 
   methods: {
-    // 切换二级类别
+    // 切换1级类别
     category1Changed() {
+      this.categoryList2 = []
+      this.categoryList3 = []
+      this.category2Id = null
+      this.category3Id = null
       this.$API.category.getCategorys2(this.category1Id).then(result => {
-        this.category2Id = null
-        this.category3Id = null
         this.categoryList2 = result.data
-
         this.$emit('listenOnSelect', this.category1Id, 1)
       })
-
-      // 清空属性列表
-      this.attrInfoList = null
     },
 
-    // 切换三级类别
+    // 切换2级类别
     category2Changed() {
+      this.categoryList3 = []
+      this.category3Id = null
       this.$API.category.getCategorys3(this.category2Id).then(result => {
-        this.category3Id = null
         this.categoryList3 = result.data
-
         this.$emit('listenOnSelect', this.category2Id, 2)
       })
     },
@@ -100,7 +98,6 @@ export default {
       // 子组件向父组件传值
       this.$emit('listenOnSelect', this.category3Id, 3)
     }
-
   }
 
 }

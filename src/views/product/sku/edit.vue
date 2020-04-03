@@ -53,8 +53,7 @@ export default {
     更新Sku ---还没法更新
     */
     async updateSkuInfo() {
-      const {id, skuName, price, weight, skuDesc} = this.sku
-      const result = await this.$API.sku.update({id, skuName, price, weight, skuDesc})
+      const result = await this.$API.sku.update(this.sku)
       if (result.code===200) {
         this.$message({
           message: '更新SKU成功',

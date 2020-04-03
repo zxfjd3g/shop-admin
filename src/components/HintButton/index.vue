@@ -1,8 +1,7 @@
 <template>
-  <el-tooltip :content="title" placement="top" effect="light" :close-delay="0"
-    :open-delay="500">
+  <a href="javascrip:" :title="title">
     <el-button v-bind="$attrs" v-on="$listeners"/>
-  </el-tooltip>
+  </a>
 </template>
 
 <script type="text/ecmascript-6">

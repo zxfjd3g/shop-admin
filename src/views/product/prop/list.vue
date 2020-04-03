@@ -9,7 +9,10 @@
       <!--属性列表-->
       <div v-if="!showAttrInfoForm">
         <div style="margin-bottom:10px;">
-          <el-button type="primary" icon="el-icon-plus" @click="toAddAttrInfo">添加平台属性</el-button>
+          <el-button type="primary" icon="el-icon-plus"      
+            @click="toAddAttrInfo" :disabled="!category3Id">
+            添加平台属性
+          </el-button>
         </div>
 
         <el-table
@@ -117,10 +120,10 @@ export default {
   data() {
     return {
       // 属性所属分类
-      category1Id: 0,
-      category2Id: 0,
-      category3Id: 0,
-      categoryId: 0,
+      category1Id: null,
+      category2Id: null,
+      category3Id: null,
+      categoryId: null,
       categoryLevel: 1,
 
       // 属性列表数据
@@ -151,22 +154,21 @@ export default {
       this.categoryLevel = categoryLevel
       if (categoryLevel === 1) {
         this.category1Id = categoryId
-        this.category2Id = 0
-        this.category3Id = 0
-      }
-      if (categoryLevel === 2) {
+        this.category2Id = null
+        this.category3Id = null
+      } else if (categoryLevel === 2) {
         this.category2Id = categoryId
-        this.category3Id = 0
-      }
-      if (categoryLevel === 3) {
+        this.category3Id = null
+      } else if (categoryLevel === 3) {
         this.category3Id = categoryId
+        // 查询数据
+        this.attrInfoListLoading = true
+        this.$API.prop.getAttrInfoList(this.category1Id, this.category2Id, this.category3Id).then(result => {
+          this.attrInfoList = result.data
+          this.attrInfoListLoading = false
+        })
       }
-      // 查询数据
-      this.attrInfoListLoading = true
-      this.$API.prop.getAttrInfoList(this.category1Id, this.category2Id, this.category3Id).then(result => {
-        this.attrInfoList = result.data
-        this.attrInfoListLoading = false
-      })
+      
     },
 
     /* 

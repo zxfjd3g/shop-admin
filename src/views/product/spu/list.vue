@@ -98,9 +98,9 @@ export default {
 
       // spu所属分类
       // 属性所属分类
-      category1Id: 0,
-      category2Id: 0,
-      category3Id: 0,
+      category1Id: null,
+      category2Id: null,
+      category3Id: null,
       categoryLevel: 1,
 
       // spu列表数据
@@ -126,23 +126,21 @@ export default {
     /* 
     处理分类ID后请求加载spu列表数据
     */
-    getSpuList(categoryId = 1, categoryLevel) {
+    getSpuList(categoryId, categoryLevel) {
       this.categoryLevel = categoryLevel
       if (categoryLevel === 1) {
         this.category1Id = categoryId
-        this.category2Id = 0
-        this.category3Id = 0
-      }
-      if (categoryLevel === 2) {
+        this.category2Id = null
+        this.category3Id = null
+      } else if (categoryLevel === 2) {
         this.category2Id = categoryId
-        this.category3Id = 0
-      }
-      if (categoryLevel === 3) {
+        this.category3Id = null
+      } else if (categoryLevel === 3) {
         this.category3Id = categoryId
+        this.searchObj.category3Id = categoryId
+        // 查询数据
+        this.fetchData(1)
       }
-      this.searchObj.category3Id = categoryId
-      // 查询数据
-      this.fetchData(1)
     },
 
     /* 
